@@ -5,8 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDate;
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,23 +17,23 @@ public class UserController {
     private final HashMap<Integer, User> users = new HashMap<>();
     private int idCounter = 1;
 
-    private void validate(User user, HttpServletRequest request) throws ValidationException {
+    private void validate(User user) throws ValidationException {
 
         if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
             ValidationException e = new ValidationException("wrong login");
-            log.debug("Получен запрос к эндпоинту: '{} {}', Ошибка: {}", request.getMethod(), request.getRequestURI(), e.getMessage());
+            log.debug("Ошибка: {}", e.getMessage());
             throw e;
         }
-        if (user.getEmail().isEmpty() || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            ValidationException e = new ValidationException("wrong email");
-            log.debug("Получен запрос к эндпоинту: '{} {}', Ошибка: {}", request.getMethod(), request.getRequestURI(), e.getMessage());
-            throw e;
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            ValidationException e = new ValidationException("birthday can't be in the future");
-            log.debug("Получен запрос к эндпоинту: '{} {}', Ошибка: {}", request.getMethod(), request.getRequestURI(), e.getMessage());
-            throw e;
-        }
+//        if (user.getEmail().isEmpty() || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+//            ValidationException e = new ValidationException("wrong email");
+//            log.debug("Ошибка: {}", e.getMessage());
+//            throw e;
+//        }
+//        if (user.getBirthday().isAfter(LocalDate.now())) {
+//            ValidationException e = new ValidationException("birthday can't be in the future");
+//            log.debug("Ошибка: {}", e.getMessage());
+//            throw e;
+//        }
         if (user.getName().isEmpty() || user.getName().isBlank()) {
             user.setName(user.getLogin());
             log.info("username has changed to login");
@@ -42,8 +41,8 @@ public class UserController {
     }
 
     @PostMapping
-    public User add(@RequestBody User user, HttpServletRequest request) throws ValidationException {
-        validate(user, request);
+    public User add(@Valid @RequestBody User user) throws ValidationException {
+        validate(user);
         user.setId(idCounter);
         idCounter++;
         users.put(user.getId(), user);
@@ -52,11 +51,11 @@ public class UserController {
     }
 
     @PutMapping
-    public User update(@RequestBody User user, HttpServletRequest request) throws ValidationException {
-        validate(user, request);
+    public User update(@Valid @RequestBody User user) throws ValidationException {
+        validate(user);
         if (!users.containsKey(user.getId())) {
             ValidationException e = new ValidationException("users doesn't contain the user");
-            log.debug("Получен запрос к эндпоинту: '{} {}', Ошибка: {}", request.getMethod(), request.getRequestURI(), e.getMessage());
+            log.debug("Ошибка: {}", e.getMessage());
             throw e;
         }
         users.put(user.getId(), user);
