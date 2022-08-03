@@ -156,7 +156,7 @@
       <option name="presentableId" value="Default" />
       <updated>1659357589614</updated>
       <workItem from="1659357590931" duration="1566000" />
-      <workItem from="1659359184847" duration="30303000" />
+      <workItem from="1659359184847" duration="30706000" />
     </task>
     <task id="LOCAL-00001" summary="Все тесты в постмане работают. Логи прописаны. Валидация вручную, без аннотаций. Осталось сделать валидацию через аннотации и тесты граничных условий">
       <created>1659523044766</created>
