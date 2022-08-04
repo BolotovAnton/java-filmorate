@@ -24,16 +24,6 @@ public class UserController {
             log.debug("Ошибка: {}", e.getMessage());
             throw e;
         }
-//        if (user.getEmail().isEmpty() || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-//            ValidationException e = new ValidationException("wrong email");
-//            log.debug("Ошибка: {}", e.getMessage());
-//            throw e;
-//        }
-//        if (user.getBirthday().isAfter(LocalDate.now())) {
-//            ValidationException e = new ValidationException("birthday can't be in the future");
-//            log.debug("Ошибка: {}", e.getMessage());
-//            throw e;
-//        }
         if (user.getName().isEmpty() || user.getName().isBlank()) {
             user.setName(user.getLogin());
             log.info("username has changed to login");

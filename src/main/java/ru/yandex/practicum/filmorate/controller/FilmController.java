@@ -35,11 +35,6 @@ public class FilmController {
             log.debug("Ошибка: {}", e.getMessage());
             throw e;
         }
-//        if (film.getDuration() <= 0) {
-//            ValidationException e = new ValidationException("duration should be positive");
-//            log.debug("Ошибка: {}", e.getMessage());
-//            throw e;
-//        }
     }
 
     @PostMapping
