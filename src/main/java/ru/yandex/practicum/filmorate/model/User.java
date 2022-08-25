@@ -10,7 +10,6 @@ import java.util.Set;
 
 @Getter
 @Setter
-//@NoArgsConstructor
 @RequiredArgsConstructor
 public class User {
 
@@ -22,7 +21,7 @@ public class User {
     @NotBlank
     @Email
     private final String email;
-    @NonNull
+    @NotNull
     @Past
     private final LocalDate birthday;
     @JsonIgnore
