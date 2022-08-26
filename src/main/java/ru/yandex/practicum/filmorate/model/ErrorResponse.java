@@ -1,9 +1,14 @@
 package ru.yandex.practicum.filmorate.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class ErrorResponse {
 
-    String error;
-    String description;
+    private String error;
+    private String description;
 
     public ErrorResponse(String error, String description) {
         this.error = error;
@@ -12,13 +17,5 @@ public class ErrorResponse {
 
     public ErrorResponse(String error) {
         this.error = error;
-    }
-
-    public String getError() {
-        return error;
-    }
-
-    public String getDescription() {
-        return description;
     }
 }
