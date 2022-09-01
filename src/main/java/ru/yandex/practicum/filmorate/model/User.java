@@ -1,14 +1,18 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashMap;
 
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
 public class User {
 
-    private int id;
+    private int userId;
     @NotBlank
     @Pattern(regexp = "^\\S*$")
     private final String login;
@@ -19,4 +23,6 @@ public class User {
     @NotNull
     @Past
     private final LocalDate birthday;
+    @JsonIgnore
+    private HashMap<Integer, FriendStatus> friendIds = new HashMap<>();
 }
