@@ -5,15 +5,14 @@ import lombok.*;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
 
 @Getter
 @Setter
 @RequiredArgsConstructor
 public class User {
 
-    private int id;
+    private int userId;
     @NotBlank
     @Pattern(regexp = "^\\S*$")
     private final String login;
@@ -25,5 +24,5 @@ public class User {
     @Past
     private final LocalDate birthday;
     @JsonIgnore
-    private Set<Integer> friendIds = new HashSet<>();
+    private HashMap<Integer, FriendStatus> friendIds = new HashMap<>();
 }

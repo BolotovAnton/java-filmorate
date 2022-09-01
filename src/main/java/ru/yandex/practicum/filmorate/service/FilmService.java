@@ -29,8 +29,8 @@ public class FilmService {
     }
 
     public Film update(Film film) {
-        if (!filmStorage.getFilms().containsKey(film.getId())) {
-            throw new NotFoundException("film with id=" + film.getId() + " not found");
+        if (!filmStorage.getFilms().containsKey(film.getFilmId())) {
+            throw new NotFoundException("film with id=" + film.getFilmId() + " not found");
         }
         return filmStorage.update(film);
     }
@@ -64,7 +64,7 @@ public class FilmService {
     }
 
     private void validateFilmId(Integer filmId) {
-        if (findAllFilms().stream().map(Film::getId).noneMatch(x -> x.equals(filmId))) {
+        if (findAllFilms().stream().map(Film::getFilmId).noneMatch(x -> x.equals(filmId))) {
             throw new NotFoundException("film with id=" + filmId + " not found");
         }
     }

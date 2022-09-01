@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -15,7 +16,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class Film {
 
-    private int id;
+    private int filmId;
     @NotBlank
     private final String name;
     @NotBlank
@@ -26,4 +27,8 @@ public class Film {
     private final int duration;
     @JsonIgnore
     private Set<Integer> likes = new HashSet<>();
+
+    private List<Genre> genres;
+    private MPA mpa;
+
 }
