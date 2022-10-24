@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-@Component
+@Component("InMemoryUserStorage")
 public class InMemoryUserStorage implements UserStorage{
 
     private static int generateId = 1;
@@ -42,7 +42,7 @@ public class InMemoryUserStorage implements UserStorage{
     }
 
     @Override
-    public HashMap<Integer, User> getUsers() {
-        return users;
+    public void deleteUserById(int userId) {
+        users.remove(userId);
     }
 }

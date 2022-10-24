@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.AlreadyExistsExeption;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
@@ -18,19 +19,19 @@ public class UserService {
     private final UserStorage userStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier("UserDbStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
     public User add(User user) {
-        if (userStorage.getUsers().values().stream().map(User::getLogin).anyMatch(x -> x.equals(user.getLogin()))) {
+        if (userStorage.findAllUsers().stream().map(User::getLogin).anyMatch(x -> x.equals(user.getLogin()))) {
             throw new AlreadyExistsExeption("user with login " + user.getLogin() + " already exists");
         }
         return userStorage.add(user);
     }
 
     public User update(User user) {
-        if (!userStorage.getUsers().containsKey(user.getUserId())) {
+        if (userStorage.findAllUsers().stream().map(User::getUserId).anyMatch(id -> id.equals(user.getUserId()))) {
             throw new NotFoundException("user with id=" + user.getUserId() + " not found");
         }
         return userStorage.update(user);
@@ -89,5 +90,9 @@ public class UserService {
         if (findAllUsers().stream().map(User::getUserId).noneMatch(x -> x.equals(userId))) {
             throw new NotFoundException("user with id=" + userId + " not found");
         }
+    }
+
+    public void deleteUserById(int userId) {
+        userStorage.deleteUserById(userId);
     }
 }

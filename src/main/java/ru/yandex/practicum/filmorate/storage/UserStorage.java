@@ -17,5 +17,5 @@ public interface UserStorage {
 
     User getUserById(Integer userId);
 
-    HashMap<Integer, User> getUsers();
+    void deleteUserById(int userId);
 }
