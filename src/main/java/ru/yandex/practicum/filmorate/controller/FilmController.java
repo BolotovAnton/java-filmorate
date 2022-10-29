@@ -27,7 +27,7 @@ public class FilmController {
     @PostMapping
     public Film add(@Valid @RequestBody Film film) throws ValidationException {
         validationFilm(film);
-        filmService.add(film);
+        film = filmService.add(film);
         log.debug("film {} has been added", film.getName());
         return film;
     }
@@ -35,7 +35,7 @@ public class FilmController {
     @PutMapping
     public Film update(@Valid @RequestBody Film film) throws ValidationException {
         validationFilm(film);
-        filmService.update(film);
+        film = filmService.update(film);
         log.debug("film {} has been updated", film.getName());
         return film;
     }
@@ -77,7 +77,7 @@ public class FilmController {
     }
 
     private void validationFilm(Film film) throws ValidationException {
-        if (film.getName().isBlank() || film.getName().isEmpty()) {
+        if (film.getName() == null || film.getName().isBlank()) {
             throw new ValidationException("empty film name");
         }
         if (film.getDescription().length() > 200) {

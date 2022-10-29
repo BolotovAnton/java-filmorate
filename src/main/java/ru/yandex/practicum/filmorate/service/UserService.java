@@ -3,15 +3,11 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.AlreadyExistsExeption;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.model.FriendStatus;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.DAO.UserStorage;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -23,16 +19,19 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
-    public User add(User user) {
-        if (userStorage.findAllUsers().stream().map(User::getLogin).anyMatch(x -> x.equals(user.getLogin()))) {
-            throw new AlreadyExistsExeption("user with login " + user.getLogin() + " already exists");
+    public void validateUserId(Integer userId) {
+        if (findAllUsers().stream().map(User::getId).noneMatch(x -> x.equals(userId))) {
+            throw new NotFoundException("user with id=" + userId + " not found");
         }
+    }
+
+    public User add(User user) {
         return userStorage.add(user);
     }
 
     public User update(User user) {
-        if (userStorage.findAllUsers().stream().map(User::getUserId).anyMatch(id -> id.equals(user.getUserId()))) {
-            throw new NotFoundException("user with id=" + user.getUserId() + " not found");
+        if (userStorage.findAllUsers().stream().map(User::getId).noneMatch(id -> id.equals(user.getId()))) {
+            throw new NotFoundException("user with id=" + user.getId() + " not found");
         }
         return userStorage.update(user);
     }
@@ -49,50 +48,23 @@ public class UserService {
     public void addFriend(Integer userId, Integer friendId) {
         validateUserId(userId);
         validateUserId(friendId);
-        if (getUserById(friendId).getFriendIds().containsKey(userId)) {
-            getUserById(userId).getFriendIds().put(friendId, FriendStatus.FRIEND);
-            getUserById(friendId).getFriendIds().put(userId, FriendStatus.FRIEND);
-        } else {
-            getUserById(userId).getFriendIds().put(friendId, FriendStatus.REQUIRED);
-        }
+        userStorage.addFriend(userId, friendId);
     }
 
     public void deleteFriend(Integer userId, Integer friendId) {
         validateUserId(userId);
         validateUserId(friendId);
-        getUserById(userId).getFriendIds().remove(friendId);
-        getUserById(friendId).getFriendIds().remove(userId);
+        userStorage.deleteFriend(userId, friendId);
     }
 
     public List<User> getCommonFriends(Integer userId, Integer friendId) {
         validateUserId(userId);
         validateUserId(friendId);
-        return getUserById(userId).getFriendIds().entrySet()
-                .stream()
-                .filter(x -> x.getValue().equals(FriendStatus.FRIEND))
-                .map(Map.Entry::getKey)
-                .filter(x -> getUserById(friendId).getFriendIds().containsKey(x))
-                .map(this::getUserById)
-                .collect(Collectors.toList());
+        return userStorage.getCommonFriends(userId, friendId);
     }
 
     public List<User> getFriends(Integer userId) {
         validateUserId(userId);
-        return getUserById(userId).getFriendIds().entrySet()
-                .stream()
-                .filter(x -> x.getValue().equals(FriendStatus.FRIEND))
-                .map(Map.Entry::getKey)
-                .map(this::getUserById)
-                .collect(Collectors.toList());
-    }
-
-    public void validateUserId(Integer userId) {
-        if (findAllUsers().stream().map(User::getUserId).noneMatch(x -> x.equals(userId))) {
-            throw new NotFoundException("user with id=" + userId + " not found");
-        }
-    }
-
-    public void deleteUserById(int userId) {
-        userStorage.deleteUserById(userId);
+        return userStorage.getFriends(userId);
     }
 }

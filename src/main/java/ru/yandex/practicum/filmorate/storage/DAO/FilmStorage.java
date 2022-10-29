@@ -1,12 +1,9 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.DAO;
 
-import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.HashMap;
 import java.util.List;
 
-@Component
 public interface FilmStorage {
 
     Film add(Film film);
@@ -17,5 +14,5 @@ public interface FilmStorage {
 
     Film getFilmById(Integer filmId);
 
-    HashMap<Integer, Film> getFilms();
+    List<Film> getPopular(Integer count);
 }

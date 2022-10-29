@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.validation.constraints.*;
@@ -14,7 +13,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class User {
 
-    private int userId;
+    private int id;
     @NotBlank
     @Pattern(regexp = "^\\S*$")
     private String login;
@@ -25,8 +24,6 @@ public class User {
     @NotNull
     @Past
     private LocalDate birthday;
-    @JsonIgnore
-    private final HashMap<Integer, FriendStatus> friendIds = new HashMap<>();
 
     public User(String name, String email, LocalDate birthday) {
         this.name = name;
@@ -37,7 +34,7 @@ public class User {
     public Map<String, Object> toMap() {
         Map<String, Object> values = new HashMap<>();
         values.put("login", login);
-        values.put("name", name);
+        values.put("user_name", name);
         values.put("email", email);
         values.put("birthday", birthday);
         return values;

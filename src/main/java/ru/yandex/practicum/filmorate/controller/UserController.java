@@ -14,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 public class UserController {
+
     private final UserService userService;
 
     @Autowired
@@ -24,9 +25,9 @@ public class UserController {
     @PostMapping
     public User add(@Valid @RequestBody User user) throws ValidationException {
         validateUser(user);
-        User added = userService.add(user);
+        user = userService.add(user);
         log.debug("user has been added");
-        return added;
+        return user;
     }
 
     @PutMapping
@@ -48,12 +49,6 @@ public class UserController {
         User user = userService.getUserById(userId);
         log.debug("user with id={} has been found", userId);
         return user;
-    }
-
-    @DeleteMapping("/{userId}")
-    public void deleteUserById(@PathVariable int userId) {
-        userService.deleteUserById(userId);
-        log.debug("user with id = {} has deen deleted", userId);
     }
 
     @PutMapping("/{userId}/friends/{friendsId}")
@@ -83,14 +78,13 @@ public class UserController {
     }
 
     private void validateUser(User user) throws ValidationException {
-        if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
+        if (user.getLogin() == null || user.getLogin().contains(" ")) {
             throw new ValidationException("wrong login");
         }
-        if (user.getName().isEmpty() || user.getName().isBlank()) {
+        if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
             log.info("username is empty, username has been changed to login");
         }
     }
-
 }
 
