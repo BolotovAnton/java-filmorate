@@ -53,7 +53,7 @@ public class UserControllerTest {
     @Test
     void userAdditionShouldTrowExceptionIfUserIsNull() {
         assertThrows(
-                ValidationException.class,
+                NullPointerException.class,
                 () -> userController.add(null)
         );
     }

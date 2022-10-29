@@ -61,7 +61,7 @@ public class FilmControllerTest {
         Film film = new Film(null, "description", LocalDate.of(2021, 12, 1), 90);
 
         assertThrows(
-                NullPointerException.class,
+                ValidationException.class,
                 () -> filmController.add(film)
         );
     }
@@ -71,7 +71,7 @@ public class FilmControllerTest {
         Film film = new Film("film", null, LocalDate.of(2021, 12, 1), 90);
 
         assertThrows(
-                ValidationException.class,
+                NullPointerException.class,
                 () -> filmController.add(film)
         );
     }
@@ -81,7 +81,7 @@ public class FilmControllerTest {
         Film film = new Film("film", "description", null, 90);
 
         assertThrows(
-                ValidationException.class,
+                NullPointerException.class,
                 () -> filmController.add(film)
         );
     }
@@ -90,7 +90,7 @@ public class FilmControllerTest {
     void filmAdditionShouldTrowExceptionIfFilmIsNull() {
 
         assertThrows(
-                ValidationException.class,
+                NullPointerException.class,
                 () -> filmController.add(null)
         );
     }
