@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.inMemory.InMemoryUserStorage;
@@ -25,9 +26,8 @@ public class UserControllerTest {
     @Test
     void userAdditionShouldTrowExceptionIfLoginIsNull() {
         User user = new User(null, "mail@mail.ru", LocalDate.of(1986, 4, 12));
-
         assertThrows(
-                NullPointerException.class,
+                ValidationException.class,
                 () -> userController.add(user)
         );
     }
@@ -35,9 +35,8 @@ public class UserControllerTest {
     @Test
     void userAdditionShouldTrowExceptionIfEmailIsNull() {
         User user = new User("login", null, LocalDate.of(1986, 4, 12));
-
         assertThrows(
-                NullPointerException.class,
+                ValidationException.class,
                 () -> userController.add(user)
         );
     }
@@ -45,9 +44,8 @@ public class UserControllerTest {
     @Test
     void userAdditionShouldTrowExceptionIfBirthdayIsNull() {
         User user = new User("login", "mail@mail.ru", null);
-
         assertThrows(
-                NullPointerException.class,
+                ValidationException.class,
                 () -> userController.add(user)
         );
     }
@@ -55,7 +53,7 @@ public class UserControllerTest {
     @Test
     void userAdditionShouldTrowExceptionIfUserIsNull() {
         assertThrows(
-                NullPointerException.class,
+                ValidationException.class,
                 () -> userController.add(null)
         );
     }

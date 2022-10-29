@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
@@ -70,7 +71,7 @@ public class FilmControllerTest {
         Film film = new Film("film", null, LocalDate.of(2021, 12, 1), 90);
 
         assertThrows(
-                NullPointerException.class,
+                ValidationException.class,
                 () -> filmController.add(film)
         );
     }
@@ -80,7 +81,7 @@ public class FilmControllerTest {
         Film film = new Film("film", "description", null, 90);
 
         assertThrows(
-                NullPointerException.class,
+                ValidationException.class,
                 () -> filmController.add(film)
         );
     }
@@ -89,7 +90,7 @@ public class FilmControllerTest {
     void filmAdditionShouldTrowExceptionIfFilmIsNull() {
 
         assertThrows(
-                NullPointerException.class,
+                ValidationException.class,
                 () -> filmController.add(null)
         );
     }
