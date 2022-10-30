@@ -8,9 +8,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.DAO.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.DAO.LikesStorage;
-import ru.yandex.practicum.filmorate.storage.DAO.MPAStorage;
+import ru.yandex.practicum.filmorate.storage.DAO.*;
 import ru.yandex.practicum.filmorate.storage.inMemory.InMemoryFilmStorage;
 import ru.yandex.practicum.filmorate.storage.inMemory.InMemoryUserStorage;
 
@@ -53,7 +51,19 @@ public class FilmControllerTest {
             public Genre getGenreById(int genreId) {
                 return null;
             }
-        }, new UserService(new InMemoryUserStorage())));
+        }, new UserService(new InMemoryUserStorage(), new FriendListStorage() {
+            @Override
+            public void addFriend(Integer userId, Integer friendId) {
+
+            }
+
+            @Override
+            public void deleteFriend(Integer userId, Integer friendId) {
+
+            }
+        }), film -> {
+
+        }));
     }
 
     @Test

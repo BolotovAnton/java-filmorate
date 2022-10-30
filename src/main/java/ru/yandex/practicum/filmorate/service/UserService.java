@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.DAO.FriendListStorage;
 import ru.yandex.practicum.filmorate.storage.DAO.UserStorage;
 
 import java.util.List;
@@ -14,9 +15,13 @@ public class UserService {
 
     private final UserStorage userStorage;
 
+    private final FriendListStorage friendListStorage;
+
     @Autowired
-    public UserService(@Qualifier("UserDbStorage") UserStorage userStorage) {
+    public UserService(@Qualifier("UserDbStorage") UserStorage userStorage,
+                       FriendListStorage friendListStorage) {
         this.userStorage = userStorage;
+        this.friendListStorage = friendListStorage;
     }
 
     public void validateUserId(Integer userId) {
@@ -48,13 +53,13 @@ public class UserService {
     public void addFriend(Integer userId, Integer friendId) {
         validateUserId(userId);
         validateUserId(friendId);
-        userStorage.addFriend(userId, friendId);
+        friendListStorage.addFriend(userId, friendId);
     }
 
     public void deleteFriend(Integer userId, Integer friendId) {
         validateUserId(userId);
         validateUserId(friendId);
-        userStorage.deleteFriend(userId, friendId);
+        friendListStorage.deleteFriend(userId, friendId);
     }
 
     public List<User> getCommonFriends(Integer userId, Integer friendId) {

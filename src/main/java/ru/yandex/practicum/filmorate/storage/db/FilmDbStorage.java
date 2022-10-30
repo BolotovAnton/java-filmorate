@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.db;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -9,7 +10,6 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.storage.DAO.FilmStorage;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -18,14 +18,11 @@ import java.util.List;
 import java.util.Set;
 
 @Component
+@RequiredArgsConstructor
 @Qualifier("FilmDbStorage")
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
-
-    public FilmDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public Film add(Film film) {
@@ -33,37 +30,17 @@ public class FilmDbStorage implements FilmStorage {
                 .withTableName("films")
                 .usingGeneratedKeyColumns("film_id");
         int filmId = simpleJdbcInsert.executeAndReturnKey(film.toMap()).intValue();
-
-        if (film.getGenres() != null) {
-            for (Genre genre : film.getGenres()) {
-                String sql = "INSERT INTO FILM_GENRES(FILM_ID, GENRE_ID) VALUES (?, ?)";
-                jdbcTemplate.update(connection -> {
-                    PreparedStatement stmt = connection.prepareStatement(sql);
-                    stmt.setInt(1, filmId);
-                    stmt.setInt(2, genre.getId());
-                    return stmt;
-                });
-            }
-        }
-        return getFilmById(filmId);
+        film.setId(filmId);
+        return film;
     }
 
     @Override
-    public Film update(Film film) {
+    public void update(Film film) {
         String sql1 = "UPDATE FILMS SET FILM_NAME" + " = ?, DESCRIPTION = ?, RELEASE_DATE" +
                 " =?, DURATION = ?, RATE = ?, MPA = ? " +
                 "WHERE FILM_ID = ?";
         jdbcTemplate.update(sql1, film.getName(), film.getDescription(), film.getReleaseDate(),
                 film.getDuration(), film.getRate(), film.getMpa().getId(), film.getId());
-
-        jdbcTemplate.update("DELETE FROM FILM_GENRES WHERE FILM_ID = ?", film.getId());
-        if (film.getGenres() != null) {
-            for (Genre genre : film.getGenres()) {
-                String sql2 = "MERGE INTO FILM_GENRES(FILM_ID, GENRE_ID) VALUES (?, ?)";
-                jdbcTemplate.update(sql2, film.getId(), genre.getId());
-            }
-        }
-        return getFilmById(film.getId());
     }
 
     @Override
@@ -79,7 +56,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film getFilmById(Integer filmId) {
         String sql2 ="SELECT * FROM FILMS AS F, MPA AS M WHERE F.MPA = M.MPA_ID AND F.FILM_ID = ?";
-        Film film = jdbcTemplate.queryForObject(sql2, (rs, rowNum) -> makeFilm(rs), filmId);
+        Film film =jdbcTemplate.queryForObject(sql2, (rs, rowNum) -> makeFilm(rs), filmId);
         assert film != null;
         film.setGenres(getGenresSetForParticularFilm(filmId));
         return film;
@@ -116,8 +93,8 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private Set<Genre> getGenresSetForParticularFilm(Integer filmId) {
-        String sql1 = "SELECT G.GENRE_ID, G.GENRE_NAME FROM FILMS AS F, MPA AS M, FILM_GENRES AS FG, GENRES AS G " +
-                "WHERE F.MPA = M.MPA_ID AND F.FILM_ID = FG.FILM_ID AND FG.GENRE_ID = G.GENRE_ID AND F.FILM_ID = ?";
-        return new LinkedHashSet<>(jdbcTemplate.query(sql1, (rs, rowNum) -> makeGenre(rs), filmId));
+        String sql = "SELECT G.GENRE_ID, G.GENRE_NAME FROM FILM_GENRES AS FG, GENRES AS G " +
+                "WHERE FG.GENRE_ID = G.GENRE_ID AND FILM_ID = ?";
+        return new LinkedHashSet<>(jdbcTemplate.query(sql, (rs, rowNum) -> makeGenre(rs), filmId));
     }
 }

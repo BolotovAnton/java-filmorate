@@ -7,10 +7,7 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
-import ru.yandex.practicum.filmorate.storage.DAO.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.DAO.GenreStorage;
-import ru.yandex.practicum.filmorate.storage.DAO.LikesStorage;
-import ru.yandex.practicum.filmorate.storage.DAO.MPAStorage;
+import ru.yandex.practicum.filmorate.storage.DAO.*;
 
 import java.util.List;
 
@@ -18,26 +15,24 @@ import java.util.List;
 public class FilmService {
 
     private final FilmStorage filmStorage;
-
     private final MPAStorage mpaStorage;
-
     private final LikesStorage likesStorage;
-
     private final GenreStorage genreStorage;
-
     private final UserService userService;
+    private final FilmGenresStorage filmGenresStorage;
 
     @Autowired
     public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage,
                        MPAStorage mpaStorage,
                        LikesStorage likesStorage,
                        GenreStorage genreStorage,
-                       UserService userService) {
+                       UserService userService, FilmGenresStorage filmGenresStorage) {
         this.filmStorage = filmStorage;
         this.mpaStorage = mpaStorage;
         this.likesStorage = likesStorage;
         this.genreStorage = genreStorage;
         this.userService = userService;
+        this.filmGenresStorage = filmGenresStorage;
     }
 
     private void validateFilmId(Integer filmId) {
@@ -47,14 +42,19 @@ public class FilmService {
     }
 
     public Film add(Film film) {
-        return filmStorage.add(film);
+        Film filmWithId = filmStorage.add(film);
+        filmGenresStorage.addOrUpdateGenresForFilm(filmWithId);
+        return filmStorage.getFilmById(filmWithId.getId());
     }
 
     public Film update(Film film) {
         if (filmStorage.findAllFilms().stream().map(Film::getId).noneMatch(x -> x.equals(film.getId()))) {
             throw new NotFoundException("film with id=" + film.getId() + " not found");
         }
-        return filmStorage.update(film);
+        filmGenresStorage.addOrUpdateGenresForFilm(film);
+        filmStorage.update(film);
+
+        return filmStorage.getFilmById(film.getId());
     }
 
     public List<Film> findAllFilms() {

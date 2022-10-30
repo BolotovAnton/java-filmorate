@@ -43,11 +43,6 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void addFriend(Integer userId, Integer friendId) {
-        //Логика для InMemory, если понядобится
-    }
-
-    @Override
     public List<User> getFriends(Integer userId) {
         //Логика для InMemory, если понядобится
         return null;
@@ -59,8 +54,4 @@ public class InMemoryUserStorage implements UserStorage {
         return null;
     }
 
-    @Override
-    public void deleteFriend(Integer userId, Integer friendId) {
-        //Логика для InMemory, если понядобится
-    }
 }

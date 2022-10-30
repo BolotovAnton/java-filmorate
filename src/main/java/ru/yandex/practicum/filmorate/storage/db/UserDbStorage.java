@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.db;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
@@ -12,13 +13,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Component("UserDbStorage")
+@RequiredArgsConstructor
 public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
-
-    public UserDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public User add(User user) {
@@ -49,12 +47,6 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void addFriend(Integer userId, Integer friendId) {
-        String sql = "INSERT INTO FRIEND_LIST(USER_ID, FRIEND_ID) " + "VALUES (?, ?)";
-        jdbcTemplate.update(sql, userId, friendId);
-    }
-
-    @Override
     public List<User> getFriends(Integer userId) {
         String sql = "SELECT * FROM USERS AS U WHERE U.USER_ID IN " +
                 "(SELECT FL.FRIEND_ID FROM FRIEND_LIST AS FL WHERE FL.USER_ID = ?)";
@@ -67,12 +59,6 @@ public class UserDbStorage implements UserStorage {
                 "WHERE U.USER_ID = FL1.FRIEND_ID and U.USER_ID = FL2.FRIEND_ID AND " +
                 "FL1.USER_ID = ? AND FL2.USER_ID = ?";
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeUser(rs), userId, friendId);
-    }
-
-    @Override
-    public void deleteFriend(Integer userId, Integer friendId) {
-        String sql = "DELETE FROM FRIEND_LIST WHERE USER_ID = ? AND FRIEND_ID = ?";
-        jdbcTemplate.update(sql, userId, friendId);
     }
 
     private User makeUser(ResultSet rs) throws SQLException {

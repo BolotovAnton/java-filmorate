@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.DAO.FriendListStorage;
 import ru.yandex.practicum.filmorate.storage.inMemory.InMemoryUserStorage;
 
 import java.time.LocalDate;
@@ -16,7 +17,17 @@ public class UserControllerTest {
     UserController userController;
     InMemoryUserStorage inMemoryUserStorage = new InMemoryUserStorage();
 
-    UserService userService = new UserService(inMemoryUserStorage);
+    UserService userService = new UserService(inMemoryUserStorage, new FriendListStorage() {
+        @Override
+        public void addFriend(Integer userId, Integer friendId) {
+
+        }
+
+        @Override
+        public void deleteFriend(Integer userId, Integer friendId) {
+
+        }
+    });
 
     @BeforeEach
     void init() {
