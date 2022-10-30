@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.DAO.FilmGenresStorage;
 import ru.yandex.practicum.filmorate.storage.DAO.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.DAO.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.DAO.MPAStorage;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 public class FilmControllerTest {
     FilmController filmController;
@@ -53,7 +55,12 @@ public class FilmControllerTest {
             public Genre getGenreById(int genreId) {
                 return null;
             }
-        }, new UserService(new InMemoryUserStorage())));
+        }, new UserService(new InMemoryUserStorage()), new FilmGenresStorage() {
+            @Override
+            public void addOrUpdateGenresForFilm(Film film) {
+
+            }
+        }));
     }
 
     @Test
