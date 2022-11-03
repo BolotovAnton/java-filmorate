@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.IncorrectParameterException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
@@ -13,21 +13,17 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/films")
 public class FilmController {
 
     private final FilmService filmService;
 
-    @Autowired
-    public FilmController(FilmService filmService) {
-        this.filmService = filmService;
-    }
-
     @PostMapping
     public Film add(@Valid @RequestBody Film film) throws ValidationException {
         validationFilm(film);
-        filmService.add(film);
+        film = filmService.add(film);
         log.debug("film {} has been added", film.getName());
         return film;
     }
@@ -35,7 +31,7 @@ public class FilmController {
     @PutMapping
     public Film update(@Valid @RequestBody Film film) throws ValidationException {
         validationFilm(film);
-        filmService.update(film);
+        film = filmService.update(film);
         log.debug("film {} has been updated", film.getName());
         return film;
     }
@@ -77,7 +73,7 @@ public class FilmController {
     }
 
     private void validationFilm(Film film) throws ValidationException {
-        if (film.getName().isBlank() || film.getName().isEmpty()) {
+        if (film.getName() == null || film.getName().isBlank()) {
             throw new ValidationException("empty film name");
         }
         if (film.getDescription().length() > 200) {

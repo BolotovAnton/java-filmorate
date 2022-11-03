@@ -1,12 +1,9 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.DAO;
 
-import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.HashMap;
 import java.util.List;
 
-@Component
 public interface UserStorage {
 
     User add(User user);
@@ -17,5 +14,7 @@ public interface UserStorage {
 
     User getUserById(Integer userId);
 
-    HashMap<Integer, User> getUsers();
+    List<User> getFriends(Integer userId);
+
+    List<User> getCommonFriends(Integer userId, Integer friendId);
 }

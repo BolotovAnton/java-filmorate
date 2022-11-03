@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -11,22 +11,19 @@ import javax.validation.Valid;
 import java.util.List;
 
 @Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private final UserService userService;
 
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+    private final UserService userService;
 
     @PostMapping
     public User add(@Valid @RequestBody User user) throws ValidationException {
         validateUser(user);
-        User added = userService.add(user);
+        user = userService.add(user);
         log.debug("user has been added");
-        return added;
+        return user;
     }
 
     @PutMapping
@@ -77,14 +74,13 @@ public class UserController {
     }
 
     private void validateUser(User user) throws ValidationException {
-        if (user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
+        if (user.getLogin() == null || user.getLogin().contains(" ")) {
             throw new ValidationException("wrong login");
         }
-        if (user.getName().isEmpty() || user.getName().isBlank()) {
+        if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
-            log.info("username is empty, username has been changed to login");
+            log.debug("username is empty, username has been changed to login");
         }
     }
-
 }
 

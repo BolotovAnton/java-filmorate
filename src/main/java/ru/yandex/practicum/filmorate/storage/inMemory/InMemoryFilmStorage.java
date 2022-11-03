@@ -1,14 +1,17 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.inMemory;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.DAO.FilmStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 @Component
-public class InMemoryFilmStorage implements FilmStorage{
+@Qualifier("InMemoryFilmStorage")
+public class InMemoryFilmStorage implements FilmStorage {
 
     private final HashMap<Integer, Film> films = new HashMap<>();
 
@@ -20,15 +23,14 @@ public class InMemoryFilmStorage implements FilmStorage{
 
     @Override
     public Film add(Film film) {
-        film.setFilmId(getNextId());
-        films.put(film.getFilmId(), film);
+        film.setId(getNextId());
+        films.put(film.getId(), film);
         return film;
     }
 
     @Override
-    public Film update(Film film) {
-        films.put(film.getFilmId(), film);
-        return film;
+    public void update(Film film) {
+        films.put(film.getId(), film);
     }
 
     @Override
@@ -42,9 +44,8 @@ public class InMemoryFilmStorage implements FilmStorage{
     }
 
     @Override
-    public HashMap<Integer, Film> getFilms() {
-        return films;
+    public List<Film> getPopular(Integer count) {
+        // Логика для InMemory, если понядобится
+        return null;
     }
-
-
 }

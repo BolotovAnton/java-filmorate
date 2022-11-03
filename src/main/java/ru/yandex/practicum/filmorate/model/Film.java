@@ -1,34 +1,60 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Setter
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 public class Film {
 
-    private int filmId;
+    private int id;
     @NotBlank
-    private final String name;
+    private String name;
     @NotBlank
-    private final String description;
+    private String description;
     @NotNull
-    private final LocalDate releaseDate;
+    private LocalDate releaseDate;
     @Positive
-    private final int duration;
-    @JsonIgnore
-    private Set<Integer> likes = new HashSet<>();
-
-    private List<Genre> genres;
+    private int duration;
+    @NotNull
+    private int rate;
+    @NotNull
     private MPA mpa;
 
+    private Set<Genre> genres;
+
+    public Film(String name, String description, LocalDate releaseDate, int duration) {
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+    }
+
+    public Film(int id, String name, String description, LocalDate releaseDate, int duration, int rate, MPA mpa) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.rate = rate;
+        this.mpa = mpa;
+    }
+
+    public Map<String, Object> toMap() {
+        Map<String, Object> values = new HashMap<>();
+        values.put("film_name", name);
+        values.put("description", description);
+        values.put("release_date", releaseDate);
+        values.put("duration", duration);
+        values.put("rate", rate);
+        values.put("mpa", mpa.getId());
+        return values;
+    }
 }

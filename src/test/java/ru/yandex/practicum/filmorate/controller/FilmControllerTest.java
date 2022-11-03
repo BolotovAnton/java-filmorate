@@ -2,15 +2,20 @@ package ru.yandex.practicum.filmorate.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.DAO.*;
+import ru.yandex.practicum.filmorate.storage.inMemory.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.inMemory.InMemoryUserStorage;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class FilmControllerTest {
     FilmController filmController;
@@ -18,7 +23,47 @@ public class FilmControllerTest {
     @BeforeEach
     void init() {
         filmController = new FilmController(new FilmService(new InMemoryFilmStorage(),
-                new UserService(new InMemoryUserStorage())));
+                new MPAStorage() {
+                    @Override
+                    public List<MPA> getAllMPA() {
+                        return null;
+                    }
+
+                    @Override
+                    public MPA getMPAById(int mpaId) {
+                        return null;
+                    }
+                }, new LikesStorage() {
+            @Override
+            public void addLike(int filmId, int userId) {
+            }
+
+            @Override
+            public void deleteLike(int filmId, int userId) {
+            }
+        }, new GenreStorage() {
+            @Override
+            public List<Genre> getAllGenre() {
+                return null;
+            }
+
+            @Override
+            public Genre getGenreById(int genreId) {
+                return null;
+            }
+        }, new UserService(new InMemoryUserStorage(), new FriendListStorage() {
+            @Override
+            public void addFriend(Integer userId, Integer friendId) {
+
+            }
+
+            @Override
+            public void deleteFriend(Integer userId, Integer friendId) {
+
+            }
+        }), film -> {
+
+        }));
     }
 
     @Test
@@ -26,7 +71,7 @@ public class FilmControllerTest {
         Film film = new Film(null, "description", LocalDate.of(2021, 12, 1), 90);
 
         assertThrows(
-                NullPointerException.class,
+                ValidationException.class,
                 () -> filmController.add(film)
         );
     }

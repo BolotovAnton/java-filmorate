@@ -1,38 +1,60 @@
 package ru.yandex.practicum.filmorate.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.AlreadyExistsExeption;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.storage.DAO.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
 
     private final FilmStorage filmStorage;
-
+    private final MPAStorage mpaStorage;
+    private final LikesStorage likesStorage;
+    private final GenreStorage genreStorage;
     private final UserService userService;
+    private final FilmGenresStorage filmGenresStorage;
 
-    public FilmService(FilmStorage filmStorage, UserService userService) {
+    @Autowired
+    public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage,
+                       MPAStorage mpaStorage,
+                       LikesStorage likesStorage,
+                       GenreStorage genreStorage,
+                       UserService userService, FilmGenresStorage filmGenresStorage) {
         this.filmStorage = filmStorage;
+        this.mpaStorage = mpaStorage;
+        this.likesStorage = likesStorage;
+        this.genreStorage = genreStorage;
         this.userService = userService;
+        this.filmGenresStorage = filmGenresStorage;
+    }
+
+    private void validateFilmId(Integer filmId) {
+        if (findAllFilms().stream().map(Film::getId).noneMatch(x -> x.equals(filmId))) {
+            throw new NotFoundException("film with id=" + filmId + " not found");
+        }
     }
 
     public Film add(Film film) {
-        if (filmStorage.findAllFilms().stream().map(Film::getName).anyMatch(x -> x.equals(film.getName()))) {
-            throw new AlreadyExistsExeption("film with name " + film.getName() + " already exists");
-        }
-        return filmStorage.add(film);
+        Film filmWithId = filmStorage.add(film);
+        filmGenresStorage.addOrUpdateGenresForFilm(filmWithId);
+        return filmStorage.getFilmById(filmWithId.getId());
     }
 
     public Film update(Film film) {
-        if (!filmStorage.getFilms().containsKey(film.getFilmId())) {
-            throw new NotFoundException("film with id=" + film.getFilmId() + " not found");
+        if (filmStorage.findAllFilms().stream().map(Film::getId).noneMatch(x -> x.equals(film.getId()))) {
+            throw new NotFoundException("film with id=" + film.getId() + " not found");
         }
-        return filmStorage.update(film);
+        filmGenresStorage.addOrUpdateGenresForFilm(film);
+        filmStorage.update(film);
+
+        return filmStorage.getFilmById(film.getId());
     }
 
     public List<Film> findAllFilms() {
@@ -47,25 +69,38 @@ public class FilmService {
     public void addLike(Integer filmId, Integer userId) {
         validateFilmId(filmId);
         userService.validateUserId(userId);
-        filmStorage.getFilmById(filmId).getLikes().add(userId);
+        likesStorage.addLike(filmId, userId);
     }
 
     public void deleteLike(Integer filmId, Integer userId) {
         validateFilmId(filmId);
         userService.validateUserId(userId);
-        filmStorage.getFilmById(filmId).getLikes().remove(userId);
+        likesStorage.deleteLike(filmId, userId);
     }
 
     public List<Film> getPopular(Integer count) {
-        return filmStorage.findAllFilms().stream()
-                .sorted((p0, p1) -> Integer.compare(p1.getLikes().size(), p0.getLikes().size()))
-                .limit(count)
-                .collect(Collectors.toList());
+        return filmStorage.getPopular(count);
     }
 
-    private void validateFilmId(Integer filmId) {
-        if (findAllFilms().stream().map(Film::getFilmId).noneMatch(x -> x.equals(filmId))) {
-            throw new NotFoundException("film with id=" + filmId + " not found");
+    public List<MPA> getAllMPA() {
+        return mpaStorage.getAllMPA();
+    }
+
+    public MPA getMPAById(int mpaId) {
+        if (getAllMPA().stream().map(MPA::getId).noneMatch(x -> x.equals(mpaId))) {
+            throw new NotFoundException("mpa with id=" + mpaId + " not found");
         }
+        return mpaStorage.getMPAById(mpaId);
+    }
+
+    public List<Genre> getAllGenres() {
+        return genreStorage.getAllGenre();
+    }
+
+    public Genre getGenreById(int genreId) {
+        if (genreStorage.getAllGenre().stream().map(Genre::getId).noneMatch(x -> x.equals(genreId))) {
+            throw new NotFoundException("genre with id=" + genreId + " not found");
+        }
+        return genreStorage.getGenreById(genreId);
     }
 }

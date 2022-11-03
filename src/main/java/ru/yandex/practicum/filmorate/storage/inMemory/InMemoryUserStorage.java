@@ -1,14 +1,15 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.inMemory;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.DAO.UserStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-@Component
-public class InMemoryUserStorage implements UserStorage{
+@Component("InMemoryUserStorage")
+public class InMemoryUserStorage implements UserStorage {
 
     private static int generateId = 1;
 
@@ -20,14 +21,14 @@ public class InMemoryUserStorage implements UserStorage{
 
     @Override
     public User add(User user) {
-        user.setUserId(getNextId());
-        users.put(user.getUserId(), user);
+        user.setId(getNextId());
+        users.put(user.getId(), user);
         return user;
     }
 
     @Override
     public User update(User user) {
-        users.put(user.getUserId(), user);
+        users.put(user.getId(), user);
         return user;
     }
 
@@ -42,7 +43,15 @@ public class InMemoryUserStorage implements UserStorage{
     }
 
     @Override
-    public HashMap<Integer, User> getUsers() {
-        return users;
+    public List<User> getFriends(Integer userId) {
+        //Логика для InMemory, если понядобится
+        return null;
     }
+
+    @Override
+    public List<User> getCommonFriends(Integer userId, Integer friendId) {
+        //Логика для InMemory, если понядобится
+        return null;
+    }
+
 }
