@@ -15,7 +15,7 @@ import java.util.*;
 public class Film {
 
     private int id;
-    @NotBlank
+    @NotBlank(message = "name can't be empty")
     private String name;
     @NotBlank
     private String description;
@@ -29,13 +29,6 @@ public class Film {
     private MPA mpa;
 
     private Set<Genre> genres;
-
-    public Film(String name, String description, LocalDate releaseDate, int duration) {
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-    }
 
     public Film(int id, String name, String description, LocalDate releaseDate, int duration, int rate, MPA mpa) {
         this.id = id;

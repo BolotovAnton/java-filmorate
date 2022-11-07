@@ -3,11 +3,15 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
+import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.DAO.*;
+import ru.yandex.practicum.filmorate.storage.DAO.review.ReviewLikesStorage;
+import ru.yandex.practicum.filmorate.storage.DAO.review.ReviewStorage;
+import ru.yandex.practicum.filmorate.validation.Validation;
 
 import java.util.List;
 
@@ -18,78 +22,94 @@ public class FilmService {
     private final MPAStorage mpaStorage;
     private final LikesStorage likesStorage;
     private final GenreStorage genreStorage;
-    private final UserService userService;
+    private final UserStorage userStorage;
     private final FilmGenresStorage filmGenresStorage;
+    private final ReviewStorage reviewStorage;
+    private final ReviewLikesStorage reviewLikesStorage;
 
     @Autowired
     public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage,
                        MPAStorage mpaStorage,
                        LikesStorage likesStorage,
                        GenreStorage genreStorage,
-                       UserService userService, FilmGenresStorage filmGenresStorage) {
+                       UserStorage userStorage,
+                       FilmGenresStorage filmGenresStorage,
+                       ReviewStorage reviewStorage,
+                       ReviewLikesStorage reviewLikesStorage) {
         this.filmStorage = filmStorage;
         this.mpaStorage = mpaStorage;
         this.likesStorage = likesStorage;
         this.genreStorage = genreStorage;
-        this.userService = userService;
+        this.userStorage = userStorage;
         this.filmGenresStorage = filmGenresStorage;
+        this.reviewStorage = reviewStorage;
+        this.reviewLikesStorage = reviewLikesStorage;
     }
 
-    private void validateFilmId(Integer filmId) {
-        if (findAllFilms().stream().map(Film::getId).noneMatch(x -> x.equals(filmId))) {
-            throw new NotFoundException("film with id=" + filmId + " not found");
-        }
-    }
-
-    public Film add(Film film) {
-        Film filmWithId = filmStorage.add(film);
+    public Film add(Film film) throws ValidationException {
+        Validation.validateFilm(film);
+        Film filmWithId = filmStorage.addFilm(film);
         filmGenresStorage.addOrUpdateGenresForFilm(filmWithId);
-        return filmStorage.getFilmById(filmWithId.getId());
+        return getFilmById(filmWithId.getId());
     }
 
-    public Film update(Film film) {
-        if (filmStorage.findAllFilms().stream().map(Film::getId).noneMatch(x -> x.equals(film.getId()))) {
-            throw new NotFoundException("film with id=" + film.getId() + " not found");
-        }
+    public Film update(Film film) throws ValidationException {
+        Validation.validateFilmId(filmStorage, film.getId());
+        Validation.validateFilm(film);
         filmGenresStorage.addOrUpdateGenresForFilm(film);
-        filmStorage.update(film);
+        filmStorage.updateFilm(film);
 
-        return filmStorage.getFilmById(film.getId());
+        return getFilmById(film.getId());
     }
 
     public List<Film> findAllFilms() {
-        return filmStorage.findAllFilms();
+        List<Film> films = filmStorage.findAllFilms();
+        for (Film film : films) {
+            film.setGenres(genreStorage.getGenresSetForParticularFilm(film.getId()));
+        }
+        return films;
     }
 
-    public Film getFilmById(Integer filmId) {
-        validateFilmId(filmId);
-        return filmStorage.getFilmById(filmId);
+    public Film getFilmById(Integer filmId) throws ValidationException {
+        Validation.validateFilmId(filmStorage, filmId);
+        Film film = filmStorage.getFilmById(filmId);
+        film.setGenres(genreStorage.getGenresSetForParticularFilm(filmId));
+        return film;
     }
 
-    public void addLike(Integer filmId, Integer userId) {
-        validateFilmId(filmId);
-        userService.validateUserId(userId);
+    public void deleteFilmById(Integer filmId) throws ValidationException {
+        Validation.validateFilmId(filmStorage, filmId);
+        filmStorage.deleteFilmById(filmId);
+    }
+
+    public void addLike(Integer filmId, Integer userId) throws ValidationException {
+        Validation.validateFilmId(filmStorage, filmId);
+        Validation.validateUserId(userStorage, userId);
         likesStorage.addLike(filmId, userId);
     }
 
-    public void deleteLike(Integer filmId, Integer userId) {
-        validateFilmId(filmId);
-        userService.validateUserId(userId);
+    public void deleteLike(Integer filmId, Integer userId) throws ValidationException {
+        Validation.validateFilmId(filmStorage, filmId);
+        Validation.validateUserId(userStorage, userId);
         likesStorage.deleteLike(filmId, userId);
     }
 
-    public List<Film> getPopular(Integer count) {
-        return filmStorage.getPopular(count);
+    public List<Film> getPopularFilms(Integer count, Integer genreId, Integer year) throws ValidationException {
+        Validation.validateCountOfLimit(count);
+        Validation.validateGenreId(genreStorage, genreId);
+        List<Film> films = filmStorage.getPopularFilms(count, genreId, year);
+        for (Film film : films) {
+            film.setGenres(genreStorage.getGenresSetForParticularFilm(film.getId()));
+        }
+        return films;
     }
 
     public List<MPA> getAllMPA() {
         return mpaStorage.getAllMPA();
     }
 
-    public MPA getMPAById(int mpaId) {
-        if (getAllMPA().stream().map(MPA::getId).noneMatch(x -> x.equals(mpaId))) {
-            throw new NotFoundException("mpa with id=" + mpaId + " not found");
-        }
+    public MPA getMPAById(int mpaId) throws ValidationException {
+        Validation.validateMPAId(mpaStorage, mpaId);
         return mpaStorage.getMPAById(mpaId);
     }
 
@@ -97,10 +117,52 @@ public class FilmService {
         return genreStorage.getAllGenre();
     }
 
-    public Genre getGenreById(int genreId) {
-        if (genreStorage.getAllGenre().stream().map(Genre::getId).noneMatch(x -> x.equals(genreId))) {
-            throw new NotFoundException("genre with id=" + genreId + " not found");
-        }
+    public Genre getGenreById(int genreId) throws ValidationException {
+        Validation.validateGenreId(genreStorage, genreId);
         return genreStorage.getGenreById(genreId);
+    }
+
+    public Review addReview(Review review) throws ValidationException {
+        Validation.validateUserId(userStorage, review.getUserId());
+        Validation.validateFilmId(filmStorage, review.getFilmId());
+        Review reviewWithId = reviewStorage.addReview(review);
+        return getReviewById(reviewWithId.getReviewId());
+    }
+
+    public Review updateReview(Review review) throws ValidationException {
+        Validation.validateReviewId(reviewStorage, review.getReviewId());
+        return reviewStorage.updateReview(review);
+    }
+
+    public void deleteReview(Integer reviewId) throws ValidationException {
+        Validation.validateReviewId(reviewStorage, reviewId);
+        reviewStorage.deleteReview(reviewId);
+    }
+
+    public Review getReviewById(Integer reviewId) throws ValidationException {
+        Validation.validateReviewId(reviewStorage, reviewId);
+        return reviewStorage.getReviewById(reviewId);
+    }
+
+    public List<Review> getReviewsForFilm(Integer filmId, Integer count) throws ValidationException {
+        Validation.validateCountOfLimit(count);
+        if (filmId == null) {
+            return reviewStorage.getAllReviewsWithLimit(count);
+        } else {
+            Validation.validateFilmId(filmStorage, filmId);
+            return reviewStorage.getReviewsForFilm(filmId, count);
+        }
+    }
+
+    public void addReviewLike(Integer reviewId, Integer userId, boolean isPositive) throws ValidationException {
+        Validation.validateReviewId(reviewStorage, reviewId);
+        Validation.validateUserId(userStorage, userId);
+        reviewLikesStorage.addReviewLike(reviewId, userId, isPositive);
+    }
+
+    public void deleteReviewLike(Integer reviewId, Integer userId) throws ValidationException {
+        Validation.validateReviewId(reviewStorage, reviewId);
+        Validation.validateUserId(userStorage, userId);
+        reviewLikesStorage.deleteReviewLike(reviewId, userId);
     }
 }

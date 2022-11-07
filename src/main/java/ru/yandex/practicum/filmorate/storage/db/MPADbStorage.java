@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.db;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.MPA;
@@ -26,6 +27,16 @@ public class MPADbStorage implements MPAStorage {
     public MPA getMPAById(int mpaId) {
         String sql = "SELECT * FROM MPA WHERE MPA_ID = ?";
         return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> makeMPA(rs), mpaId);
+    }
+
+    @Override
+    public boolean dbContainsMPA(Integer mpaId) {
+        try {
+            getMPAById(mpaId);
+            return true;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }
     }
 
     private MPA makeMPA (ResultSet rs) throws SQLException {

@@ -20,7 +20,6 @@ public class UserController {
 
     @PostMapping
     public User add(@Valid @RequestBody User user) throws ValidationException {
-        validateUser(user);
         user = userService.add(user);
         log.debug("user has been added");
         return user;
@@ -28,7 +27,6 @@ public class UserController {
 
     @PutMapping
     public User update(@Valid @RequestBody User user) throws ValidationException {
-        validateUser(user);
         userService.update(user);
         log.debug("user has been updated");
         return user;
@@ -41,46 +39,42 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public User getUserById(@PathVariable int userId) {
+    public User getUserById(@PathVariable int userId) throws ValidationException {
         User user = userService.getUserById(userId);
         log.debug("user with id={} has been found", userId);
         return user;
     }
 
+    @DeleteMapping("/{userId}")
+    public void deleteUserById(@PathVariable int userId) throws ValidationException {
+        userService.deleteUserById(userId);
+        log.debug("user with id={} has been deleted", userId);
+    }
+
     @PutMapping("/{userId}/friends/{friendsId}")
-    public void addFriend(@PathVariable Integer userId, @PathVariable Integer friendsId) {
+    public void addFriend(@PathVariable Integer userId, @PathVariable Integer friendsId) throws ValidationException {
         userService.addFriend(userId, friendsId);
         log.debug("friend with id={} has been added for user with id={}", friendsId, userId);
     }
 
     @DeleteMapping("/{userId}/friends/{friendsId}")
-    public void deleteFriend(@PathVariable Integer userId, @PathVariable Integer friendsId) {
+    public void deleteFriend(@PathVariable Integer userId, @PathVariable Integer friendsId) throws ValidationException {
         userService.deleteFriend(userId, friendsId);
         log.debug("friend with id={} has been deleted for user with id={}", friendsId, userId);
     }
 
     @GetMapping("/{userId}/friends/common/{friendsId}")
-    public List<User> getCommonFriends(@PathVariable Integer userId, @PathVariable Integer friendsId) {
+    public List<User> getCommonFriends(@PathVariable Integer userId, @PathVariable Integer friendsId) throws ValidationException {
         List<User> commonFriends = userService.getCommonFriends(userId, friendsId);
         log.debug("amount of common friends for users with ids {} and {} is {}", userId, friendsId, commonFriends.size());
         return commonFriends;
     }
 
     @GetMapping("/{userId}/friends")
-    public List<User> getFriends(@PathVariable Integer userId) {
+    public List<User> getFriends(@PathVariable Integer userId) throws ValidationException {
         List<User> friends = userService.getFriends(userId);
         log.debug("amount of friends for user with id={} is {}", userId, friends.size());
         return friends;
-    }
-
-    private void validateUser(User user) throws ValidationException {
-        if (user.getLogin() == null || user.getLogin().contains(" ")) {
-            throw new ValidationException("wrong login");
-        }
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-            log.debug("username is empty, username has been changed to login");
-        }
     }
 }
 

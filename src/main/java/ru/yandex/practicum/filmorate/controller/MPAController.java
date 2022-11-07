@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -26,7 +27,7 @@ public class MPAController {
     }
 
     @GetMapping("/{mpaId}")
-    public MPA getMPAById(@PathVariable int mpaId) {
+    public MPA getMPAById(@PathVariable int mpaId) throws ValidationException {
         MPA mpa = filmService.getMPAById(mpaId);
         log.debug("MPA with id = {} has been found", mpaId);
         return mpa;

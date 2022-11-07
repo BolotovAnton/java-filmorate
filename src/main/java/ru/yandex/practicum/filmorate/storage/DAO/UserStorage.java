@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface UserStorage {
 
-    User add(User user);
+    User addUser(User user);
 
-    User update(User user);
+    User updateUser(User user);
 
     List<User> findAllUsers();
 
@@ -17,4 +17,8 @@ public interface UserStorage {
     List<User> getFriends(Integer userId);
 
     List<User> getCommonFriends(Integer userId, Integer friendId);
+
+    boolean dbContainsUser(Integer reviewId);
+
+    void deleteUserById(int userId);
 }

@@ -6,13 +6,17 @@ import java.util.List;
 
 public interface FilmStorage {
 
-    Film add(Film film);
+    Film addFilm(Film film);
 
-    void update(Film film);
+    void updateFilm(Film film);
 
     List<Film> findAllFilms();
 
     Film getFilmById(Integer filmId);
 
-    List<Film> getPopular(Integer count);
+    List<Film> getPopularFilms(Integer count, Integer genreId, Integer year);
+
+    boolean dbContainsFilm(Integer filmId);
+
+    void deleteFilmById(Integer filmId);
 }

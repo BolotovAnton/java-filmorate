@@ -9,4 +9,6 @@ public interface MPAStorage {
     List<MPA> getAllMPA();
 
     MPA getMPAById(int mpaId);
+
+    boolean dbContainsMPA(Integer mpaId);
 }
