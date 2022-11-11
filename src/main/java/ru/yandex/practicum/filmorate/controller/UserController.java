@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -75,6 +76,13 @@ public class UserController {
         List<User> friends = userService.getFriends(userId);
         log.debug("amount of friends for user with id={} is {}", userId, friends.size());
         return friends;
+    }
+
+    @GetMapping("/{userId}/feed")
+    public List<Feed> getFeedByUser(@PathVariable Integer userId) throws ValidationException {
+        List<Feed> feeds = userService.getFeedByUserId(userId);
+        log.debug("feeds length of user with id = {} is {}", userId, feeds.size());
+        return feeds;
     }
 }
 

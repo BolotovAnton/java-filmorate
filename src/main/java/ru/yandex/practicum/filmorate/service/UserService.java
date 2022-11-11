@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.DAO.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.DAO.FriendListStorage;
 import ru.yandex.practicum.filmorate.storage.DAO.UserStorage;
 import ru.yandex.practicum.filmorate.validation.Validation;
@@ -18,11 +20,14 @@ public class UserService {
 
     private final FriendListStorage friendListStorage;
 
+    private final FeedStorage feedStorage;
+
     @Autowired
     public UserService(@Qualifier("UserDbStorage") UserStorage userStorage,
-                       FriendListStorage friendListStorage) {
+                       FriendListStorage friendListStorage, FeedStorage feedStorage) {
         this.userStorage = userStorage;
         this.friendListStorage = friendListStorage;
+        this.feedStorage = feedStorage;
     }
 
     public User add(User user) throws ValidationException {
@@ -54,12 +59,14 @@ public class UserService {
         Validation.validateUserId(userStorage, userId);
         Validation.validateUserId(userStorage, friendId);
         friendListStorage.addFriend(userId, friendId);
+        feedStorage.addFeed(userId, "FRIEND", "ADD", friendId);
     }
 
     public void deleteFriend(Integer userId, Integer friendId) throws ValidationException {
         Validation.validateUserId(userStorage, userId);
         Validation.validateUserId(userStorage, friendId);
         friendListStorage.deleteFriend(userId, friendId);
+        feedStorage.addFeed(userId, "FRIEND", "REMOVE", friendId);
     }
 
     public List<User> getCommonFriends(Integer userId, Integer friendId) throws ValidationException {
@@ -71,5 +78,10 @@ public class UserService {
     public List<User> getFriends(Integer userId) throws ValidationException {
         Validation.validateUserId(userStorage, userId);
         return userStorage.getFriends(userId);
+    }
+
+    public List<Feed> getFeedByUserId(Integer userId) throws ValidationException {
+        Validation.validateUserId(userStorage, userId);
+        return feedStorage.getFeedByUserId(userId);
     }
 }
