@@ -1,3 +1,3 @@
 # java-filmorate
+![ER_diagram_for_filmorate](/assets/images/filmorate.png)
 Template repository for Filmorate project.
-![2022-09-02_15-35-07](https://github.com/KateSpace/java-filmorate/blob/add-database/filmorate.png)

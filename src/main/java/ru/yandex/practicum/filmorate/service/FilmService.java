@@ -26,6 +26,7 @@ public class FilmService {
     private final FilmGenresStorage filmGenresStorage;
     private final ReviewStorage reviewStorage;
     private final ReviewLikesStorage reviewLikesStorage;
+    private final FeedStorage feedStorage;
 
     @Autowired
     public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage,
@@ -35,7 +36,7 @@ public class FilmService {
                        UserStorage userStorage,
                        FilmGenresStorage filmGenresStorage,
                        ReviewStorage reviewStorage,
-                       ReviewLikesStorage reviewLikesStorage) {
+                       ReviewLikesStorage reviewLikesStorage, FeedStorage feedStorage) {
         this.filmStorage = filmStorage;
         this.mpaStorage = mpaStorage;
         this.likesStorage = likesStorage;
@@ -44,6 +45,7 @@ public class FilmService {
         this.filmGenresStorage = filmGenresStorage;
         this.reviewStorage = reviewStorage;
         this.reviewLikesStorage = reviewLikesStorage;
+        this.feedStorage = feedStorage;
     }
 
     public Film add(Film film) throws ValidationException {
@@ -86,12 +88,14 @@ public class FilmService {
         Validation.validateFilmId(filmStorage, filmId);
         Validation.validateUserId(userStorage, userId);
         likesStorage.addLike(filmId, userId);
+        feedStorage.addFeed(userId, "LIKE", "ADD", filmId);
     }
 
     public void deleteLike(Integer filmId, Integer userId) throws ValidationException {
         Validation.validateFilmId(filmStorage, filmId);
         Validation.validateUserId(userStorage, userId);
         likesStorage.deleteLike(filmId, userId);
+        feedStorage.addFeed(userId, "LIKE", "REMOVE", filmId);
     }
 
     public List<Film> getPopularFilms(Integer count, Integer genreId, Integer year) throws ValidationException {
@@ -126,17 +130,22 @@ public class FilmService {
         Validation.validateUserId(userStorage, review.getUserId());
         Validation.validateFilmId(filmStorage, review.getFilmId());
         Review reviewWithId = reviewStorage.addReview(review);
+        feedStorage.addFeed(reviewWithId.getUserId(), "REVIEW", "ADD", reviewWithId.getReviewId());
         return getReviewById(reviewWithId.getReviewId());
     }
 
     public Review updateReview(Review review) throws ValidationException {
         Validation.validateReviewId(reviewStorage, review.getReviewId());
-        return reviewStorage.updateReview(review);
+        review = reviewStorage.updateReview(review);
+        feedStorage.addFeed(review.getUserId(), "REVIEW", "UPDATE", review.getReviewId());
+        return review;
     }
 
     public void deleteReview(Integer reviewId) throws ValidationException {
         Validation.validateReviewId(reviewStorage, reviewId);
+        int userId = getReviewById(reviewId).getUserId();
         reviewStorage.deleteReview(reviewId);
+        feedStorage.addFeed(userId, "REVIEW", "REMOVE", reviewId);
     }
 
     public Review getReviewById(Integer reviewId) throws ValidationException {
